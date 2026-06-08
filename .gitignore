@@ -1,0 +1,11 @@
+.env
+__pycache__/
+*.pyc
+*.pkl
+chroma_db/
+plots/
+*.egg-info/
+.venv/
+venv/
+dist/
+build/
