@@ -1,1 +1,0 @@
-{"result": "AGREED", "ran_share_ms": 5, "edge_share_ms": 5, "ran_bw_mhz": 16.66666666666667, "ran_energy_w": 8.333333333333336, "edge_freq_ghz": 38.888888888888886, "edge_cost": 38.888888888888886, "sla_met": true, "rounds": 0, "load_level": "moderate", "rag_on": true, "episode_idx": 0, "intent_type": "URLLC"}

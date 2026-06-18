@@ -11,3 +11,4 @@ dist/
 build/
 results/rag_on/outcomes.jsonl
 results/rag_on/progress.jsonl
+results/rag_on/progress.json
