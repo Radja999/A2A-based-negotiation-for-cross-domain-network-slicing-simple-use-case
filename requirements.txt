@@ -4,3 +4,7 @@ numpy
 matplotlib
 tenacity
 python-dotenv
+
+# slim_arm additions
+fastapi>=0.110.0
+httpx>=0.27.0

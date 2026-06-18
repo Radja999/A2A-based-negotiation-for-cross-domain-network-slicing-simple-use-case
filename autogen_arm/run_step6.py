@@ -46,7 +46,7 @@ from shared.dkb import DKB
 from shared.seed_dkb import seed_all_dkbs
 from shared.traffic import LoadProcess
 from tools import RunState
-from negotiation import run_episode
+from negotiation_p2p import run_episode_p2p
 
 # To use a lighter model during 70B quota exhaustion:
 # import llm_config as _lc
@@ -222,8 +222,8 @@ def main():
     print(f"{'═'*72}\n")
     print(f"Intent: {intent}\n")
 
-    # ── run episode via negotiation.run_episode ──────────────────────────────
-    outcome = run_episode(
+    # ── run episode via negotiation_p2p.run_episode_p2p ─────────────────────
+    outcome = run_episode_p2p(
         intent, ransim, edgesim, load,
         orch_dkb, ran_dkb, edge_dkb, run_state, rng,
         rag_on=True,

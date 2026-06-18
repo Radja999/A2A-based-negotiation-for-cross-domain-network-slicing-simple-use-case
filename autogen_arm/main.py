@@ -45,7 +45,7 @@ from shared.dkb      import DKB
 from shared.seed_dkb import seed_all_dkbs
 from shared.traffic  import LoadProcess
 from tools           import RunState
-from negotiation     import run_episode
+from negotiation_p2p import run_episode_p2p
 import shared.metrics as met
 
 # ──────────────────────────────────────────────────────────────────────────────
@@ -126,7 +126,7 @@ def load_dkb(path: str) -> DKB:
 
 
 # ──────────────────────────────────────────────────────────────────────────────
-# checkpoint helpers
+# checkpoint helpers   "Save everything needed to resume the experiment later."
 # ──────────────────────────────────────────────────────────────────────────────
 
 def _strip_outcome(outcome: dict) -> dict:
@@ -255,7 +255,7 @@ def run_condition(
         print(f"[ep {ep:03d}/{n-1}] {condition_label} | intent={_INTENT_TYPES.get(intent,'?')} "
               f"| rag={'Y' if rag_on else 'N'}", flush=True)
 
-        outcome = run_episode(
+        outcome = run_episode_p2p(
             intent, ransim, edgesim, load,
             orch_dkb, ran_dkb, edge_dkb, run_state, rng,
             rag_on=rag_on,
@@ -336,8 +336,8 @@ def main(argv=None) -> None:
         return
 
     # Determine output directory
-    outdir = args.outdir or (
-        os.path.join("results", "rag_on" if args.rag_on else "rag_off")
+    outdir = args.outdir or os.path.join(
+        "results", "rag_on" if args.rag_on else "rag_off"
     )
 
     outcomes = run_condition(

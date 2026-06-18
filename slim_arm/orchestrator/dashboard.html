@@ -1,0 +1,291 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>6G Negotiation Dashboard</title>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: 'Segoe UI', system-ui, sans-serif; background: #0f1117; color: #e2e8f0; min-height: 100vh; padding: 24px; }
+  h1 { font-size: 1.5rem; font-weight: 700; color: #7dd3fc; margin-bottom: 24px; letter-spacing: 0.05em; }
+  h2 { font-size: 0.85rem; font-weight: 600; color: #94a3b8; text-transform: uppercase; letter-spacing: 0.1em; margin-bottom: 12px; }
+  section { margin-bottom: 28px; }
+
+  /* Agent status cards */
+  .agent-grid { display: flex; gap: 16px; flex-wrap: wrap; }
+  .agent-card {
+    background: #1e2330; border: 1px solid #2d3748; border-radius: 10px;
+    padding: 16px 20px; flex: 1; min-width: 180px;
+  }
+  .agent-card .dot {
+    display: inline-block; width: 10px; height: 10px; border-radius: 50%;
+    background: #22c55e; margin-right: 8px; box-shadow: 0 0 6px #22c55e;
+  }
+  .agent-name { font-weight: 600; font-size: 1rem; }
+  .agent-topic { font-size: 0.72rem; color: #64748b; margin-top: 4px; font-family: monospace; }
+
+  /* Form */
+  .form-row { display: flex; gap: 12px; flex-wrap: wrap; align-items: flex-end; }
+  .form-group { display: flex; flex-direction: column; gap: 6px; }
+  label { font-size: 0.8rem; color: #94a3b8; }
+  input[type="text"] {
+    background: #1e2330; border: 1px solid #2d3748; border-radius: 6px;
+    color: #e2e8f0; padding: 8px 12px; font-size: 0.9rem; width: 320px; outline: none;
+  }
+  input[type="text"]:focus { border-color: #7dd3fc; }
+  select {
+    background: #1e2330; border: 1px solid #2d3748; border-radius: 6px;
+    color: #e2e8f0; padding: 8px 12px; font-size: 0.9rem; outline: none;
+  }
+  select:focus { border-color: #7dd3fc; }
+  button {
+    background: #2563eb; color: white; border: none; border-radius: 6px;
+    padding: 9px 20px; font-size: 0.9rem; font-weight: 600; cursor: pointer;
+    transition: background 0.15s;
+  }
+  button:hover { background: #1d4ed8; }
+  button:disabled { background: #374151; color: #6b7280; cursor: not-allowed; }
+
+  /* Result box */
+  #result-box {
+    margin-top: 14px; background: #1e2330; border: 1px solid #2d3748;
+    border-radius: 8px; padding: 14px 16px; font-family: monospace;
+    font-size: 0.85rem; min-height: 48px; white-space: pre-wrap; color: #a3e635;
+    display: none;
+  }
+  #result-box.error { color: #f87171; }
+
+  /* Last episode panel */
+  .episode-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(130px, 1fr)); gap: 12px; }
+  .episode-stat {
+    background: #1e2330; border: 1px solid #2d3748; border-radius: 8px;
+    padding: 12px 14px;
+  }
+  .episode-stat .stat-label { font-size: 0.72rem; color: #64748b; text-transform: uppercase; letter-spacing: 0.08em; }
+  .episode-stat .stat-value { font-size: 1.1rem; font-weight: 700; margin-top: 4px; }
+  .agreed  { color: #22c55e; }
+  .rejected { color: #f87171; }
+  .neutral { color: #7dd3fc; }
+  #no-episode { color: #4b5563; font-size: 0.85rem; font-style: italic; }
+
+  /* Spans table */
+  .table-wrap { overflow-x: auto; }
+  table { width: 100%; border-collapse: collapse; font-size: 0.8rem; }
+  th { background: #1e2330; color: #64748b; text-align: left; padding: 8px 12px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.08em; border-bottom: 1px solid #2d3748; }
+  td { padding: 7px 12px; border-bottom: 1px solid #1a1f2e; vertical-align: top; }
+  tr:hover td { background: #1e2330; }
+  .span-orch td:first-child { border-left: 3px solid #60a5fa; }
+  .span-ran  td:first-child { border-left: 3px solid #4ade80; }
+  .span-edge td:first-child { border-left: 3px solid #fbbf24; }
+  .badge {
+    display: inline-block; font-size: 0.68rem; font-weight: 700; padding: 2px 6px;
+    border-radius: 4px; text-transform: uppercase;
+  }
+  .badge-ok  { background: #14532d; color: #4ade80; }
+  .badge-err { background: #450a0a; color: #f87171; }
+  .attr-text { color: #94a3b8; font-family: monospace; font-size: 0.72rem; }
+  #no-spans { color: #4b5563; font-size: 0.85rem; font-style: italic; padding: 12px 0; }
+
+  .spinner {
+    display: inline-block; width: 14px; height: 14px;
+    border: 2px solid #374151; border-top-color: #7dd3fc;
+    border-radius: 50%; animation: spin 0.7s linear infinite; margin-right: 6px; vertical-align: middle;
+  }
+  @keyframes spin { to { transform: rotate(360deg); } }
+</style>
+</head>
+<body>
+
+<h1>6G Cross-Domain Negotiation — Live Dashboard</h1>
+
+<!-- Agent Status -->
+<section>
+  <h2>Agent Status</h2>
+  <div class="agent-grid" id="agent-grid">
+    <div class="agent-card"><span class="dot"></span><span class="agent-name">Orchestrator</span><div class="agent-topic" id="topic-orch">—</div></div>
+    <div class="agent-card"><span class="dot"></span><span class="agent-name">RAN Domain</span><div class="agent-topic" id="topic-ran">—</div></div>
+    <div class="agent-card"><span class="dot"></span><span class="agent-name">Edge Domain</span><div class="agent-topic" id="topic-edge">—</div></div>
+  </div>
+</section>
+
+<!-- Submit Intent -->
+<section>
+  <h2>Submit Intent</h2>
+  <div class="form-row">
+    <div class="form-group">
+      <label for="intent-input">Intent description</label>
+      <input type="text" id="intent-input" placeholder="e.g. urllc autonomous driving" value="urllc autonomous driving">
+    </div>
+    <button id="submit-btn" onclick="submitIntent()">Negotiate</button>
+  </div>
+  <div id="result-box"></div>
+</section>
+
+<!-- Last Episode -->
+<section>
+  <h2>Last Episode Result</h2>
+  <div id="episode-panel">
+    <p id="no-episode">No episode completed yet. Submit an intent above.</p>
+    <div class="episode-grid" id="episode-grid" style="display:none"></div>
+  </div>
+</section>
+
+<!-- Spans -->
+<section>
+  <h2>Recent Negotiation Trace</h2>
+  <div class="table-wrap">
+    <p id="no-spans">No spans yet. Run a negotiation to see trace data.</p>
+    <table id="spans-table" style="display:none">
+      <thead>
+        <tr>
+          <th>Span</th>
+          <th>Duration</th>
+          <th>Status</th>
+          <th>Attributes</th>
+        </tr>
+      </thead>
+      <tbody id="spans-body"></tbody>
+    </table>
+  </div>
+</section>
+
+<script>
+  async function submitIntent() {
+    const btn    = document.getElementById('submit-btn');
+    const box    = document.getElementById('result-box');
+    const intent = document.getElementById('intent-input').value.trim();
+
+    if (!intent) return;
+
+    btn.disabled = true;
+    btn.innerHTML = '<span class="spinner"></span>Negotiating…';
+    box.style.display = 'block';
+    box.className = '';
+    box.textContent = 'Sending to orchestrator…';
+
+    try {
+      const res = await fetch('/agent/prompt', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ intent, rag_on: true }),
+      });
+      const data = await res.json();
+      if (!res.ok) {
+        box.className = 'error';
+        box.textContent = 'Error: ' + (data.detail || res.statusText);
+      } else {
+        box.textContent = JSON.stringify(data.outcome, null, 2);
+      }
+    } catch (e) {
+      box.className = 'error';
+      box.textContent = 'Request failed: ' + e.message;
+    } finally {
+      btn.disabled = false;
+      btn.textContent = 'Negotiate';
+    }
+  }
+
+  function renderEpisode(ep) {
+    const noEp  = document.getElementById('no-episode');
+    const grid  = document.getElementById('episode-grid');
+    if (!ep) { noEp.style.display = ''; grid.style.display = 'none'; return; }
+    noEp.style.display = 'none';
+    grid.style.display = '';
+    const agreed = ep.result === 'AGREED';
+    grid.innerHTML = `
+      <div class="episode-stat">
+        <div class="stat-label">Result</div>
+        <div class="stat-value ${agreed ? 'agreed' : 'rejected'}">${ep.result || '—'}</div>
+      </div>
+      <div class="episode-stat">
+        <div class="stat-label">SLA Met</div>
+        <div class="stat-value ${ep.sla_met ? 'agreed' : 'rejected'}">${ep.sla_met === undefined ? '—' : ep.sla_met ? 'YES' : 'NO'}</div>
+      </div>
+      <div class="episode-stat">
+        <div class="stat-label">RAN Share</div>
+        <div class="stat-value neutral">${ep.ran_share_ms != null ? ep.ran_share_ms + ' ms' : '—'}</div>
+      </div>
+      <div class="episode-stat">
+        <div class="stat-label">Edge Share</div>
+        <div class="stat-value neutral">${ep.edge_share_ms != null ? ep.edge_share_ms + ' ms' : '—'}</div>
+      </div>
+      <div class="episode-stat">
+        <div class="stat-label">Rounds</div>
+        <div class="stat-value neutral">${ep.rounds != null ? ep.rounds : '—'}</div>
+      </div>
+      <div class="episode-stat">
+        <div class="stat-label">Intent</div>
+        <div class="stat-value neutral" style="font-size:0.85rem">${ep.intent_type || '—'}</div>
+      </div>
+      <div class="episode-stat">
+        <div class="stat-label">Load</div>
+        <div class="stat-value neutral" style="font-size:0.85rem">${ep.load_level || '—'}</div>
+      </div>
+    `;
+  }
+
+  function spanRowClass(name) {
+    if (name.startsWith('orchestrator')) return 'span-orch';
+    if (name.startsWith('ran'))          return 'span-ran';
+    if (name.startsWith('edge'))         return 'span-edge';
+    return '';
+  }
+
+  function renderSpans(spans) {
+    const noSpans = document.getElementById('no-spans');
+    const table   = document.getElementById('spans-table');
+    const tbody   = document.getElementById('spans-body');
+    if (!spans || spans.length === 0) {
+      noSpans.style.display = '';
+      table.style.display = 'none';
+      return;
+    }
+    noSpans.style.display = 'none';
+    table.style.display = '';
+    const recent = spans.slice(-20).reverse();
+    tbody.innerHTML = recent.map(s => {
+      const attrs = Object.entries(s.attributes || {})
+        .map(([k, v]) => `${k}=${v}`).join('  ');
+      const ok = s.status === 'OK' || s.status === 'UNSET';
+      return `<tr class="${spanRowClass(s.name)}">
+        <td>${s.name}</td>
+        <td>${s.duration_ms} ms</td>
+        <td><span class="badge ${ok ? 'badge-ok' : 'badge-err'}">${s.status}</span></td>
+        <td class="attr-text">${attrs || '—'}</td>
+      </tr>`;
+    }).join('');
+  }
+
+  async function pollStatus() {
+    try {
+      const res  = await fetch('/api/status');
+      const data = await res.json();
+      const agents = data.agents || {};
+      document.getElementById('topic-orch').textContent  = agents.orchestrator?.topic || '—';
+      document.getElementById('topic-ran').textContent   = agents.ran?.topic || '—';
+      document.getElementById('topic-edge').textContent  = agents.edge?.topic || '—';
+      renderEpisode(data.last_episode);
+    } catch (_) {}
+  }
+
+  async function pollSpans() {
+    try {
+      const res  = await fetch('/api/spans');
+      const data = await res.json();
+      renderSpans(data.spans || []);
+    } catch (_) {}
+  }
+
+  // Initial load + interval
+  pollStatus();
+  pollSpans();
+  setInterval(pollStatus, 3000);
+  setInterval(pollSpans,  3000);
+
+  // Submit on Enter
+  document.getElementById('intent-input').addEventListener('keydown', e => {
+    if (e.key === 'Enter') submitIntent();
+  });
+</script>
+</body>
+</html>

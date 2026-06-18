@@ -1,0 +1,12 @@
+version: "3.9"
+services:
+  slim:
+    image: ghcr.io/agntcy/slim:1.0.0
+    ports:
+      - "46357:46357"
+      - "46358:46358"
+    volumes:
+      - ./slim_arm/config/slim/server-config.yaml:/etc/slim/server-config.yaml
+    entrypoint: ["/slim"]
+    command: ["--config", "/etc/slim/server-config.yaml"]
+    restart: unless-stopped

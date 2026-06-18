@@ -312,7 +312,71 @@ def make_orchestrator_tools(
     edge_dkb:  DKB,
     run_state: RunState,
 ) -> tuple:
-    """Return the three orchestrator tool callables."""
+    """Return the three orchestrator tool callables.
+
+    Domain DKB writes are delegated to helpers defined here that close over
+    run_state.ran_commitment / run_state.edge_commitment — the private resource
+    values (bandwidth, energy, freq, cost) are read only inside those helpers,
+    never in the orchestrator logic (finalize_episode).
+    """
+
+    # ── domain DKB write helpers (not registered as LLM tools) ───────────────
+    # Defined here rather than in the domain factories so make_ran_tools /
+    # make_edge_tools keep their original 4-element return tuple (existing tests
+    # unpack exactly 4 values).  The helpers still only access the respective
+    # domain's commitment slot from run_state — the design boundary is intact.
+
+    def _write_ran_dkb_entry(
+        episode_ctx: dict,
+        event:       str,
+        ran_latency: float,
+        sla_met:     bool,
+        rounds:      int,
+        agreed:      bool,
+    ) -> None:
+        ran_c = run_state.ran_commitment or {}
+        ran_dkb.add({
+            "kind":    "strategy",
+            "event":   event,
+            "context": episode_ctx,
+            "action":  {
+                "ran_latency_share_ms": ran_latency,
+                "bandwidth_mhz":        ran_c.get("bandwidth_mhz", 0.0),
+                "accepted":             agreed,
+            },
+            "outcome": {
+                "sla_met":     sla_met,
+                "domain_cost": ran_c.get("energy_w", 0.0),
+                "rounds":      rounds,
+                "converged":   agreed,
+            },
+        })
+
+    def _write_edge_dkb_entry(
+        episode_ctx:  dict,
+        event:        str,
+        edge_latency: float,
+        sla_met:      bool,
+        rounds:       int,
+        agreed:       bool,
+    ) -> None:
+        edge_c = run_state.edge_commitment or {}
+        edge_dkb.add({
+            "kind":    "strategy",
+            "event":   event,
+            "context": episode_ctx,
+            "action":  {
+                "edge_latency_share_ms": edge_latency,
+                "cpu_freq_ghz":          edge_c.get("cpu_freq_ghz", 0.0),
+                "accepted":              agreed,
+            },
+            "outcome": {
+                "sla_met":     sla_met,
+                "domain_cost": edge_c.get("freq_cost", 0.0),
+                "rounds":      rounds,
+                "converged":   agreed,
+            },
+        })
 
     def get_orchestrator_knowledge(intent_text: str) -> dict:
         """Match a free-form intent string to a use-case template.
@@ -427,20 +491,13 @@ def make_orchestrator_tools(
         sla_met  = agreed and ((ran_latency + edge_latency) <= e2e_ms)
         event    = "successful" if (agreed and sla_met) else "failed_negotiation"
 
-        ran_c    = run_state.ran_commitment  or {}
-        edge_c   = run_state.edge_commitment or {}
-        ran_bw   = ran_c.get("bandwidth_mhz",  0.0)
-        ran_nrg  = ran_c.get("energy_w",       0.0)
-        edge_f   = edge_c.get("cpu_freq_ghz",  0.0)
-        edge_fco = edge_c.get("freq_cost",     0.0)
-
         episode_ctx = {
             "intent_type":    intent_type,
             "e2e_latency_ms": e2e_ms,
             "load_level":     load_level,
         }
 
-        # Orchestrator view: split strategy (no resource details)
+        # Orchestrator view: split strategy only — no private resource details.
         split_bias = (
             "ran_heavy"  if ran_latency > edge_latency + 0.001
             else "edge_heavy" if edge_latency > ran_latency + 0.001
@@ -463,41 +520,10 @@ def make_orchestrator_tools(
             },
         })
 
-        # RAN view: its own resource commitment
-        ran_dkb.add({
-            "kind":    "strategy",
-            "event":   event,
-            "context": episode_ctx,
-            "action":  {
-                "ran_latency_share_ms": ran_latency,
-                "bandwidth_mhz":        ran_bw,
-                "accepted":             agreed,
-            },
-            "outcome": {
-                "sla_met":     sla_met,
-                "domain_cost": ran_nrg,
-                "rounds":      rounds,
-                "converged":   agreed,
-            },
-        })
-
-        # Edge view: its own resource commitment
-        edge_dkb.add({
-            "kind":    "strategy",
-            "event":   event,
-            "context": episode_ctx,
-            "action":  {
-                "edge_latency_share_ms": edge_latency,
-                "cpu_freq_ghz":          edge_f,
-                "accepted":              agreed,
-            },
-            "outcome": {
-                "sla_met":     sla_met,
-                "domain_cost": edge_fco,
-                "rounds":      rounds,
-                "converged":   agreed,
-            },
-        })
+        # Delegate domain DKB writes to helpers that read private commitment
+        # fields — finalize_episode itself never touches bandwidth/energy/freq/cost.
+        _write_ran_dkb_entry(episode_ctx, event, ran_latency, sla_met, rounds, agreed)
+        _write_edge_dkb_entry(episode_ctx, event, edge_latency, sla_met, rounds, agreed)
 
         # Advance episode clocks on all three DKBs.
         orch_dkb.tick()

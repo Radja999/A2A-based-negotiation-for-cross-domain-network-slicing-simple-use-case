@@ -248,8 +248,11 @@ def make_agents(
     # AutoGen's execute_function does json.loads("null") → None, skips the
     # execution block, and then hits `str(content)` with content unbound
     # (UnboundLocalError).  Patch each executor to normalise null → "{}".
+    # AutoGen/Groq safeguard: some LLM tool calls may send null or empty
+    # arguments instead of "{}". Patch execute_function() to normalize these
+    # cases and prevent tool execution failures.
     _orig_exec = autogen.ConversableAgent.execute_function
-
+    
     def _safe_execute_function(self, func_call, verbose=False):
         args = func_call.get("arguments")
         if args is None or (isinstance(args, str) and args.strip() in ("null", "")):

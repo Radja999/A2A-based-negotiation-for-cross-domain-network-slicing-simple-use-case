@@ -1,0 +1,17 @@
+{
+  "last_episode": 0,
+  "outcomes": [
+    {
+      "edge_share_ms": 5.0,
+      "result": "AGREED",
+      "rounds": 2.0,
+      "load_level": "moderate",
+      "ran_share_ms": 5.0,
+      "sla_met": true,
+      "intent_type": "URLLC",
+      "rag_on": true,
+      "episode_idx": 0,
+      "timestamp": 1781201758.2615693
+    }
+  ]
+}

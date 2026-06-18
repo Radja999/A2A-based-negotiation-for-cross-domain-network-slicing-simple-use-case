@@ -1,0 +1,176 @@
+{
+  "name": "edge",
+  "now": 1,
+  "_max_observed_cost": 48.6,
+  "_counter": 6,
+  "_entries": [
+    {
+      "kind": "strategy",
+      "event": "successful",
+      "context": {
+        "intent_type": "URLLC",
+        "e2e_latency_ms": 10.0,
+        "load_level": "low"
+      },
+      "context_tokens": [
+        "intent:URLLC",
+        "e2e:10",
+        "load:low"
+      ],
+      "action": {
+        "edge_latency_share_ms": 5.0,
+        "cpu_freq_ghz": 38.9,
+        "accepted": true
+      },
+      "outcome": {
+        "sla_met": true,
+        "domain_cost": 38.9,
+        "rounds": 2,
+        "converged": true
+      },
+      "timestamp": 0,
+      "id": "edge_0",
+      "score": 0.5888888888888889
+    },
+    {
+      "kind": "strategy",
+      "event": "successful",
+      "context": {
+        "intent_type": "URLLC",
+        "e2e_latency_ms": 10.0,
+        "load_level": "moderate"
+      },
+      "context_tokens": [
+        "intent:URLLC",
+        "e2e:10",
+        "load:moderate"
+      ],
+      "action": {
+        "edge_latency_share_ms": 4.0,
+        "cpu_freq_ghz": 48.6,
+        "accepted": true
+      },
+      "outcome": {
+        "sla_met": true,
+        "domain_cost": 48.6,
+        "rounds": 4,
+        "converged": true
+      },
+      "timestamp": 0,
+      "id": "edge_1",
+      "score": 0.5777777777777777
+    },
+    {
+      "kind": "strategy",
+      "event": "successful",
+      "context": {
+        "intent_type": "URLLC",
+        "e2e_latency_ms": 10.0,
+        "load_level": "high"
+      },
+      "context_tokens": [
+        "intent:URLLC",
+        "e2e:10",
+        "load:high"
+      ],
+      "action": {
+        "edge_latency_share_ms": 4.5,
+        "cpu_freq_ghz": 43.2,
+        "accepted": true
+      },
+      "outcome": {
+        "sla_met": true,
+        "domain_cost": 43.2,
+        "rounds": 6,
+        "converged": true
+      },
+      "timestamp": 0,
+      "id": "edge_2",
+      "score": 0.611111111111111
+    },
+    {
+      "kind": "strategy",
+      "event": "failed_negotiation",
+      "context": {
+        "intent_type": "URLLC",
+        "e2e_latency_ms": 10.0,
+        "load_level": "high"
+      },
+      "context_tokens": [
+        "intent:URLLC",
+        "e2e:10",
+        "load:high"
+      ],
+      "action": {
+        "edge_latency_share_ms": 2.5,
+        "cpu_freq_ghz": 30.0,
+        "accepted": false
+      },
+      "outcome": {
+        "sla_met": false,
+        "domain_cost": 30.0,
+        "rounds": 8,
+        "converged": false
+      },
+      "timestamp": 0,
+      "id": "edge_3",
+      "score": 0.0
+    },
+    {
+      "kind": "strategy",
+      "event": "successful",
+      "context": {
+        "intent_type": "eMBB",
+        "e2e_latency_ms": 50.0,
+        "load_level": "moderate"
+      },
+      "context_tokens": [
+        "intent:EMBB",
+        "e2e:50",
+        "load:moderate"
+      ],
+      "action": {
+        "edge_latency_share_ms": 25.0,
+        "cpu_freq_ghz": 20.0,
+        "accepted": true
+      },
+      "outcome": {
+        "sla_met": true,
+        "domain_cost": 20.0,
+        "rounds": 2,
+        "converged": true
+      },
+      "timestamp": 0,
+      "id": "edge_4",
+      "score": 0.8242798353909465
+    },
+    {
+      "kind": "strategy",
+      "event": "successful",
+      "context": {
+        "intent_type": "URLLC",
+        "e2e_latency_ms": 10.0,
+        "load_level": "moderate"
+      },
+      "action": {
+        "edge_latency_share_ms": 5,
+        "cpu_freq_ghz": 38.888888888888886,
+        "accepted": true
+      },
+      "outcome": {
+        "sla_met": true,
+        "domain_cost": 38.888888888888886,
+        "rounds": 0,
+        "converged": true
+      },
+      "id": "edge_5",
+      "context_tokens": [
+        "intent:URLLC",
+        "e2e:10",
+        "load:moderate"
+      ],
+      "timestamp": 0,
+      "score": 0.6799268404206675
+    }
+  ]
+}

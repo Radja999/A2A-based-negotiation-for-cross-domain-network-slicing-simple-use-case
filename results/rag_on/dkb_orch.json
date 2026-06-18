@@ -1,0 +1,217 @@
+{
+  "name": "orchestrator",
+  "now": 1,
+  "_max_observed_cost": 1.0,
+  "_counter": 8,
+  "_entries": [
+    {
+      "kind": "service_template",
+      "event": "successful",
+      "context": {
+        "intent_type": "URLLC",
+        "e2e_latency_ms": 10.0
+      },
+      "context_tokens": [
+        "intent:URLLC",
+        "e2e:10"
+      ],
+      "action": {
+        "e2e_latency_ms": 10.0,
+        "reliability": 0.99999,
+        "bandwidth_mbps": 50,
+        "split_bias": "adaptive"
+      },
+      "description": "Ultra-Reliable Low-Latency: very tight latency budget. Bias split toward whichever domain signals tighter capacity.",
+      "outcome": {},
+      "score": 1.0,
+      "timestamp": 0,
+      "id": "orchestrator_0"
+    },
+    {
+      "kind": "service_template",
+      "event": "successful",
+      "context": {
+        "intent_type": "eMBB",
+        "e2e_latency_ms": 50.0
+      },
+      "context_tokens": [
+        "intent:EMBB",
+        "e2e:50"
+      ],
+      "action": {
+        "e2e_latency_ms": 50.0,
+        "reliability": 0.999,
+        "bandwidth_mbps": 200,
+        "split_bias": "balanced"
+      },
+      "description": "Enhanced Mobile Broadband: loose latency, high throughput. Balanced split is usually fine.",
+      "outcome": {},
+      "score": 1.0,
+      "timestamp": 0,
+      "id": "orchestrator_1"
+    },
+    {
+      "kind": "service_template",
+      "event": "successful",
+      "context": {
+        "intent_type": "mMTC",
+        "e2e_latency_ms": 100.0
+      },
+      "context_tokens": [
+        "intent:MMTC",
+        "e2e:100"
+      ],
+      "action": {
+        "e2e_latency_ms": 100.0,
+        "reliability": 0.99,
+        "bandwidth_mbps": 10,
+        "split_bias": "cost_minimise"
+      },
+      "description": "Massive Machine-Type Comms: very loose latency. Minimise resource cost; even unbalanced splits are acceptable.",
+      "outcome": {},
+      "score": 1.0,
+      "timestamp": 0,
+      "id": "orchestrator_2"
+    },
+    {
+      "kind": "strategy",
+      "event": "successful",
+      "context": {
+        "intent_type": "URLLC",
+        "e2e_latency_ms": 10.0,
+        "load_level": "low"
+      },
+      "context_tokens": [
+        "intent:URLLC",
+        "e2e:10",
+        "load:low"
+      ],
+      "action": {
+        "ran_latency_ms": 5.0,
+        "edge_latency_ms": 5.0,
+        "basis": "balanced"
+      },
+      "outcome": {
+        "sla_met": true,
+        "domain_cost": 0.0,
+        "rounds": 2,
+        "converged": true
+      },
+      "timestamp": 0,
+      "id": "orchestrator_3",
+      "score": 0.9888888888888889
+    },
+    {
+      "kind": "strategy",
+      "event": "successful",
+      "context": {
+        "intent_type": "URLLC",
+        "e2e_latency_ms": 10.0,
+        "load_level": "high"
+      },
+      "context_tokens": [
+        "intent:URLLC",
+        "e2e:10",
+        "load:high"
+      ],
+      "action": {
+        "ran_latency_ms": 6.0,
+        "edge_latency_ms": 4.0,
+        "basis": "ran_heavy"
+      },
+      "outcome": {
+        "sla_met": true,
+        "domain_cost": 0.0,
+        "rounds": 5,
+        "converged": true
+      },
+      "timestamp": 0,
+      "id": "orchestrator_4",
+      "score": 0.9722222222222222
+    },
+    {
+      "kind": "strategy",
+      "event": "successful",
+      "context": {
+        "intent_type": "eMBB",
+        "e2e_latency_ms": 50.0,
+        "load_level": "moderate"
+      },
+      "context_tokens": [
+        "intent:EMBB",
+        "e2e:50",
+        "load:moderate"
+      ],
+      "action": {
+        "ran_latency_ms": 25.0,
+        "edge_latency_ms": 25.0,
+        "basis": "balanced"
+      },
+      "outcome": {
+        "sla_met": true,
+        "domain_cost": 0.0,
+        "rounds": 2,
+        "converged": true
+      },
+      "timestamp": 0,
+      "id": "orchestrator_5",
+      "score": 0.9888888888888889
+    },
+    {
+      "kind": "strategy",
+      "event": "failed_negotiation",
+      "context": {
+        "intent_type": "URLLC",
+        "e2e_latency_ms": 10.0,
+        "load_level": "high"
+      },
+      "context_tokens": [
+        "intent:URLLC",
+        "e2e:10",
+        "load:high"
+      ],
+      "action": {
+        "ran_latency_ms": 4.0,
+        "edge_latency_ms": 6.0,
+        "basis": "edge_heavy"
+      },
+      "outcome": {
+        "sla_met": false,
+        "domain_cost": 0.0,
+        "rounds": 8,
+        "converged": false
+      },
+      "timestamp": 0,
+      "id": "orchestrator_6",
+      "score": 0.0
+    },
+    {
+      "kind": "strategy",
+      "event": "successful",
+      "context": {
+        "intent_type": "URLLC",
+        "e2e_latency_ms": 10.0,
+        "load_level": "moderate"
+      },
+      "action": {
+        "ran_latency_ms": 5,
+        "edge_latency_ms": 5,
+        "basis": "balanced"
+      },
+      "outcome": {
+        "sla_met": true,
+        "domain_cost": 0.0,
+        "rounds": 0,
+        "converged": true
+      },
+      "id": "orchestrator_7",
+      "context_tokens": [
+        "intent:URLLC",
+        "e2e:10",
+        "load:moderate"
+      ],
+      "timestamp": 0,
+      "score": 1.0
+    }
+  ]
+}

@@ -3,6 +3,10 @@ import os
 import time
 import logging
 import functools
+from pathlib import Path
+
+from dotenv import load_dotenv
+load_dotenv(Path(__file__).resolve().parent.parent / ".env")
 
 from shared.config import LLM_MAX_RETRIES, LLM_BACKOFF_BASE_S
 

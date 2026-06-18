@@ -58,3 +58,9 @@ LLM_PROVIDER        = "groq"        # "groq" | "gemini" | "ollama"
 LLM_MAX_RETRIES     = 5             # retry on 429
 LLM_BACKOFF_BASE_S  = 2.0           # exponential: 2, 4, 8, 16, 32 s
 INTER_EPISODE_SLEEP = 2.0           # seconds between episodes (~30 RPM guard)
+
+# ---- A2A arm (additive; do not modify AutoGen constants above) ----------------
+A2A_HOST               = "127.0.0.1"
+A2A_PORTS              = {"orchestrator": 9000, "ran": 9001, "edge": 9002}
+MAX_PEER_ROUNDS        = 6    # counter limit per peer pair (cf. SOFT_COUNTER_LIMIT)
+A2A_PORT_WAIT_TIMEOUT_S = 30  # seconds a2a_run waits for a server port on startup
